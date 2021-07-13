@@ -6,14 +6,13 @@ import psycopg2
 from geopy.geocoders import Nominatim
 from telebot import TeleBot, types
 from dotenv import load_dotenv, find_dotenv
-from boto.s3.connection import S3Connection
 
 load_dotenv(find_dotenv())
 #app = TeleBot(os.getenv('TELEGRAMKEY'))  # Telegram Bot
-app = TeleBot(S3Connection(os.environ['TELEGRAMKEY']))
+app = TeleBot(os.environ['TELEGRAMKEY'])
 chat_aidi = []  # Where we'll store our authorized chats
 #con = psycopg2.connect(os.getenv('DATABASEURI'))
-con = psycopg2.connect(S3Connection(os.environ['DATABASEURI']))
+con = psycopg2.connect(os.environ['DATABASEURI'])
 stlen = 0
 geolocator = Nominatim(user_agent="la rosquita")
 # Menu Principal
@@ -22,7 +21,7 @@ menu1 = types.KeyboardButton('Ordenes activas')
 menu2 = types.KeyboardButton('Confirmar orden')
 menu3 = types.KeyboardButton('Cancelar orden')
 main_markup.add(menu1, menu2, menu3)
-
+print(os.environ['TELEGRAMKEY'])
 
 @app.message_handler(commands=['start'])
 def start(message):
@@ -33,7 +32,7 @@ def start(message):
 
 
 def paso_passwd(message):
-    if(message.text == S3Connection(os.environ['PASSWORD'])):
+    if(message.text == os.environ['PASSWORD']):
         chat_aidi.append(message.chat.id)
         app.send_message(message.chat.id, "Acceso concedido",
                          reply_markup=main_markup)
