@@ -49,25 +49,22 @@ def flujo_principal(message):
             cur = con.cursor()
             cur.execute("SELECT * from pedido where estado='activo'")
             rows = cur.fetchall()
-            if(len(rows) == 0):
+            if (len(rows) == 0):
                 app.send_message(message.chat.id, "No hay ordenes activas")
-            # Armar ordenes a la verga
             else:
                 markup = types.ReplyKeyboardMarkup(row_width=3)
-                cont = 1
                 mes = "**¿Qué orden desea confirmar?**\n\n"
-                for row in rows:
+                for cont, row in enumerate(rows, start=1):
                     cur.execute(
                         "SELECT * from pedido where id_usuario="+row[7])
                     nombre = cur.fetchall()
                     mes += str(cont)+". "+"Nombre: "+nombre[0][4]+"\n"
                     markup.add(types.KeyboardButton(str(cont)))
-                    cont += 1
                 markup.add(types.KeyboardButton('Salir'))
                 msg = app.send_message(
                     message.chat.id, mes, reply_markup=markup)
                 app.register_next_step_handler(msg, confirmar)
-            # continuar flujo
+                    # continuar flujo
         elif message.text == "Ordenes activas":
             cur = con.cursor()
             cur.execute("SELECT * from pedido where estado='activo'")
@@ -84,7 +81,8 @@ def flujo_principal(message):
                     direc = get_address(row[3], row[4])
                     men += "[Direccion: "+direc + \
                         "](https://www.google.com/maps/@" + \
-                           row[3]+","+row[4]+"\n\n"
+                           row[3]+","+row[4]+"\n"
+                    men += "Teléfono: "+nombre[0][3]+"\n\n"
                     items = query(row[0])
                     for item in items:
                         men += "**"+item[0]+":**\n"
@@ -99,19 +97,17 @@ def flujo_principal(message):
             cur = con.cursor()
             cur.execute("SELECT * from pedido where estado='activo'")
             rows = cur.fetchall()
-            if(len(rows) == 0):
+            if (len(rows) == 0):
                 app.send_message(message.chat.id, "No hay ordenes activas")
             else:
                 markup = types.ReplyKeyboardMarkup(row_width=3)
-                cont = 1
                 mes = "**¿Qué orden desea cancelar?**\n\n"
-                for row in rows:
+                for cont, row in enumerate(rows, start=1):
                     cur.execute(
                         "SELECT * from pedido where id_usuario="+row[7])
                     nombre = cur.fetchall()
                     mes += str(cont)+". "+"Nombre: "+nombre[0][4]+"\n"
                     markup.add(types.KeyboardButton(str(cont)))
-                    cont += 1
                 markup.add(types.KeyboardButton('Salir'))
                 msg = app.send_message(
                     message.chat.id, mes, reply_markup=main_markup)
@@ -180,29 +176,29 @@ def refresh():
         cur = con.cursor()
         cur.execute("SELECT * from pedido where estado='activo'")
         rows = cur.fetchall()
-        if(len(rows) != stlen):
+        if (len(rows) != stlen):
             newpedidos = len(rows)-stlen
             count = 0
             for row in reversed(rows):
-                if(count == newpedidos):
+                if (count == newpedidos):
                     break
-                else:
-                    cur.execute("SELECT * from pedido where id_usuario="+row[7])
-                    nombre = cur.fetchall()
-                    men = "Nuevo pedido\n\n"
-                    men += "Nombre: "+nombre[0][4]+"\n"
-                    direc = get_address(row[3], row[4])
-                    men += "[Direccion: "+direc + \
-                        "](https://www.google.com/maps/@"+row[3]+","+row[4]+"\n\n"
-                    items = query(row[0])
-                    for item in items:
-                        men += "**"+item[0]+":**\n"
-                        men += +item[1]+"\n"
-                        men += +item[2]+"\n"
-                        men += +item[3]+"\n"
-                        men += +item[4]+"\n"
-                        men += +item[5]+"\n\n"
-                    count+=1
+                cur.execute("SELECT * from pedido where id_usuario="+row[7])
+                nombre = cur.fetchall()
+                men = "Nuevo pedido\n\n"
+                men += "Nombre: "+nombre[0][4]+"\n"
+                direc = get_address(row[3], row[4])
+                men += "[Direccion: "+direc + \
+                    "](https://www.google.com/maps/@"+row[3]+","+row[4]+"\n"
+                men += "Teléfono: "+nombre[0][3]+"\n\n"
+                items = query(row[0])
+                for item in items:
+                    men += "**"+item[0]+":**\n"
+                    men += +item[1]+"\n"
+                    men += +item[2]+"\n"
+                    men += +item[3]+"\n"
+                    men += +item[4]+"\n"
+                    men += +item[5]+"\n\n"
+                count+=1
             for i in range(len(chat_aidi)):
                 app.send_message(chat_aidi[i], men)
             stlen = len(rows)
